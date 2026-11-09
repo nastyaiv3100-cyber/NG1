@@ -95,8 +95,9 @@ header{position:absolute;top:0;left:0;width:100%;z-index:4;border:0;background:t
 
 /* Reframe the shared video background so the cat sits a little farther right. */
 @media(min-width:701px){
- .scene-video{transform:translateX(clamp(28px,3vw,60px));transform-origin:center;mask-image:linear-gradient(to right,transparent,#000 7%)}
- .scene{background-image:url('assets/greeting-poster.jpg');background-size:100% 100%;background-position:center}
+ .scene-video{transform:translateX(var(--scene-shift));transform-origin:center}
+ .scene{--scene-shift:clamp(28px,3vw,60px);background-image:url('assets/greeting-poster.jpg');background-size:100% 100%;background-position:var(--scene-shift) center;background-repeat:no-repeat}
+ .scene-edge{position:absolute;left:0;top:0;width:var(--scene-shift);height:100%;z-index:-2;pointer-events:none}
 }
 
 .scene .stats h2{color:#fff5de;text-shadow:0 2px 4px #3e1f14,0 0 12px #3e1f1499}
@@ -122,6 +123,7 @@ header{position:absolute;top:0;left:0;width:100%;z-index:4;border:0;background:t
  .scene{padding-top:68px}.scene .stats h2{font-size:22px}.scene .stats p{font-size:10px}
  .scene .grid{flex-basis:61svh;gap:5px}
 }
+.scene-edge{display:none}@media(min-width:701px){.scene-edge{display:block}}
 </style>
 </head>
 <body>
@@ -208,4 +210,8 @@ function checkVictory(){if(victoryPlayed||!allGiftsOpened()||reactionActive||$('
 $('modal').addEventListener('close',checkVictory);
 const video=$('greeting'),playButton=$('play-video');video.loop=false;playButton.onclick=async()=>{if(video.paused){if(video.ended)video.currentTime=0;try{await video.play()}catch{$('video-status').textContent='Не удалось запустить видео. Попробуй нажать ещё раз.'}}else video.pause()};video.addEventListener('play',()=>{playButton.textContent='Ⅱ Пауза';$('video-status').textContent=soundOn?'Слушай приветствие героя':'Видео без звука · включи звук кнопкой сверху'});video.addEventListener('pause',()=>{playButton.textContent=video.ended?'↻ Посмотреть ещё раз':'▶ Продолжить приветствие'});video.addEventListener('ended',()=>{playButton.textContent='↻ Посмотреть ещё раз';$('video-status').textContent='А теперь выбирай подарок справа!';checkVictory()});video.addEventListener('error',()=>{$('video-status').textContent='Видео не загрузилось. Подарки по-прежнему можно открывать.'});
 $('sound').onclick=()=>{soundOn=!soundOn;if(!soundOn&&ctx)ctx.suspend().catch(()=>{});updateSound();save();if(soundOn)tone()};$('close').onclick=()=>$('modal').close();document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('modal').open)$('modal').close()});$('modal').onclick=e=>{if(e.target===$('modal')){const r=$('modal').getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)$('modal').close()}};function resetGame(){const d=$('reset-confirm');d.returnValue='cancel';if(!d.open)d.showModal()}function performReset(){stopReaction();video.pause();video.currentTime=0;if(ctx){const old=ctx;ctx=undefined;old.close().catch(()=>{})}document.querySelectorAll('.confetti').forEach(e=>e.remove());if($('modal').open)$('modal').close();opened.clear();windowOrder=shuffleWindows();victoryPlayed=false;taskProgress={};storeTasks();save();render();$('hint').textContent='';video.play().catch(()=>{$('video-status').textContent='Нажми, чтобы запустить приветствие';playButton.textContent='▶ Смотреть приветствие'})} $('reset-confirm').addEventListener('close',()=>{if($('reset-confirm').returnValue==='restart')performReset()});$('reset').onclick=resetGame;save();render();updateSound();video.play().catch(()=>{$('video-status').textContent='Нажми, чтобы запустить приветствие';playButton.textContent='▶ Смотреть приветствие'});if(opened.size===40)$('hint').textContent='✦ Все 40 окошек открыты! Пусть волшебство останется с тобой.';
+
+// Mirror the current frame's narrow outer edge into the exposed margin.
+// This keeps the shifted video seamless without a second image of the cat.
+(()=>{const scene=document.querySelector('.scene'),edge=document.createElement('canvas');edge.className='scene-edge';edge.setAttribute('aria-hidden','true');edge.width=64;scene.prepend(edge);const context=edge.getContext('2d');let previousVideo,previousTime=-1;function paint(){if(matchMedia('(min-width:701px)').matches&&!document.hidden){const active=scene.querySelector('.reaction-video:not([hidden])')||video;if(active.readyState>=2&&(active!==previousVideo||active.currentTime!==previousTime)){if(edge.height!==active.videoHeight)edge.height=active.videoHeight;const sourceWidth=active.videoWidth*edge.getBoundingClientRect().width/scene.clientWidth;context.setTransform(-1,0,0,1,edge.width,0);context.drawImage(active,0,0,sourceWidth,active.videoHeight,0,0,edge.width,edge.height);context.setTransform(1,0,0,1,0,0);previousVideo=active;previousTime=active.currentTime;}}requestAnimationFrame(paint)}paint()})();
 </script></body></html>
