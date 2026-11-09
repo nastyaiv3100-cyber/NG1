@@ -95,12 +95,16 @@ header{position:absolute;top:0;left:0;width:100%;z-index:4;border:0;background:t
 
 /* Reframe the shared video background so the cat sits a little farther right. */
 @media(min-width:701px){
- .scene-video{transform:scale(1.08);transform-origin:left center}
- .scene{background-size:108% 108%;background-position:left center}
+ .scene-video{transform:scale(1.16);transform-origin:left center}
+ .scene{background-size:116% 116%;background-position:left center}
 }
 
 .scene .stats h2{color:#fff5de;text-shadow:0 2px 4px #3e1f14,0 0 12px #3e1f1499}
 .scene .stats p{color:#fff1d3;text-shadow:0 1px 3px #3e1f14,0 0 8px #3e1f14aa}
+
+/* High contrast title block remains readable over every video frame. */
+.scene .stats>div:first-child{background:#5b2e1be8;border:1px solid #f2be7e88;border-radius:14px;padding:10px 16px;box-shadow:0 3px 14px #35170f44}
+.scene .stats h2,.scene .stats p{color:#fffaf0!important;text-shadow:0 2px 3px #32170f!important}
 </style>
 </head>
 <body>
