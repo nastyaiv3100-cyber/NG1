@@ -92,6 +92,12 @@ header{position:absolute;top:0;left:0;width:100%;z-index:4;border:0;background:t
  header{background:#60331f}.scene .panel{background:#754528dd}
  #modal,#modal.task-card{left:12px;right:12px;top:145px;width:calc(100% - 24px);max-height:75svh}
 }
+
+/* Reframe the shared video background so the cat sits a little farther right. */
+@media(min-width:701px){
+ .scene-video{transform:scale(1.08);transform-origin:left center}
+ .scene{background-size:108% 108%;background-position:left center}
+}
 </style>
 </head>
 <body>
