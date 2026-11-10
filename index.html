@@ -124,6 +124,10 @@ header{position:absolute;top:0;left:0;width:100%;z-index:4;border:0;background:t
  .scene .grid{flex-basis:61svh;gap:5px}
 }
 .scene-edge{display:none}@media(min-width:701px){.scene-edge{display:block}}
+
+.task-illustration{display:block;max-width:100%;max-height:180px;object-fit:contain;background:#fff;border-radius:10px;padding:12px;margin:4px auto 14px}
+#modal.task-card .task-form:has(input[inputmode="text"]) .answer-row{grid-template-columns:minmax(0,1fr) minmax(160px,1fr)}
+@media(max-width:700px){#modal.task-card .task-form:has(input[inputmode="text"]) .answer-row{grid-template-columns:1fr}.task-illustration{max-height:140px}}
 </style>
 </head>
 <body>
@@ -172,35 +176,484 @@ function stopReaction(){reactionVersion++;clearTimeout(reactionTimer);document.q
 function playReaction(id,done){stopReaction();if(unavailableReactions.has(id)||!$(id).querySelector('source[src]')){done();return}const version=reactionVersion,r=$(id);reactionActive=true;video.pause();r.currentTime=0;r.muted=!soundOn;r.hidden=false;const finish=()=>{if(version!==reactionVersion||!reactionActive)return;stopReaction();done()};const fail=()=>{if(version!==reactionVersion||!reactionActive)return;unavailableReactions.add(id);finish()};r.onended=finish;r.onerror=fail;reactionTimer=setTimeout(fail,(Number.isFinite(r.duration)?r.duration+5:20)*1000);if(r.error){fail();return}r.play().catch(fail)}
 
 const tasks=[
-{title:'Бочонки с мёдом',text:'В 9 одинаковых бочонках 72 кг мёда. Сколько мёда в 10 таких же бочонках?',fields:[['Масса мёда в 10 бочонках, кг',80]]},
-{title:'Выполни вычисления',fields:[['54 : 3 + 784 × 1',802],['66 − 36 : (9 : 3)',54],['300 − 100 : 4 × 2',250],['17 × 3 × 10 − 394',116]]},
-{title:'Сравни величины',compare:true,fields:[['180 мин … 1 ч 30 мин','>'],['1 кг … 700 г','>'],['8 дм 7 см … 1 м','<'],['8 м 6 см … 8 м 6 дм','<']]},
-{title:'Реши уравнения',fields:[['x : 5 = 150. Найди x',750],['570 − y = 140. Найди y',430]]},
-{title:'Молоко для больницы',text:'В машину погрузили 9 бидонов с молоком по 40 л в каждом. Когда часть молока отвезли в детскую больницу, в машине осталось 4 бидона. Сколько литров молока отвезли в больницу?',fields:[['Отвезли молока, л',200]]},
-{title:'Квадрат',text:'Выполни чертёж и реши задачу. Периметр квадрата 20 см. Найди длину одной его стороны и площадь.',drawing:true,fields:[['Сторона квадрата, см',5],['Площадь квадрата, см²',25]]},
-{title:'Картошка и морковь',text:'Во сколько раз масса картошки больше массы моркови, если треть всей картошки — это 6 кг, а половина моркови — 3 кг?',fields:[['Во сколько раз?',3]]},
-{title:'Конфеты и вафли',text:'Что легче и на сколько килограммов: 8 коробок конфет по 32 кг в каждой или 7 коробок вафель по 36 кг в каждой?',fields:[['Что легче?','вафли',['Конфеты','Вафли']],['На сколько килограммов?',4]]},
-{title:'Сравни величины',compare:true,fields:[['2500 мм … 25 см','>'],['3 км 205 м … 3250 м','<'],['6 т 800 кг … 68 ц','='],['10250 кг … 10 т 2 ц','>']]},
-{title:'Выполни вычисления',fields:[['25819 + 1',25820],['395000 : 100',3950],['309 × 100',30900],['75800 − 10000',65800],['500000 − 1',499999],['130007 + 8000',138007]]},
-{title:'Вычисли в столбик',text:'Запиши решение в столбик в тетради, затем введи результат.',fields:[['28 км 640 м − 9 км 890 м: километры',18],['Оставшиеся метры',750],['18360 кг + 16 т 740 кг: тонны',35],['Оставшиеся килограммы',100],['4 ч 40 мин − 55 мин: часы',3],['Оставшиеся минуты',45]]},
-{title:'Реши уравнение',text:'290 + x = 640 − 260',fields:[['Найди x',90]]},
-{title:'Огурцы для столовой',text:'Для школьной столовой засолили огурцы. В первый день — в 5 бочонках по 18 кг в каждом. Во второй день засолили на 105 кг больше, чем в первый. Сколько килограммов огурцов засолили за два дня?',fields:[['За два дня, кг',285]]},
-{title:'Реши примеры',fields:[['(480 + 320) : 8 × (9 + 91)',10000],['711 : 9 + (506 − 105 × 4)',165]]},
-{title:'Реши примеры',fields:[['8600 × 100',860000],['105600 : 10',10560],['56000 : 1000',56],['916 × 1000',916000]]},
-{title:'Дома в городе',text:'В городе 325 каменных домов. Их на 101 больше, чем деревянных. Сколько деревянных домов?',fields:[['Деревянных домов',224]]},
-{title:'Переведи величины',fields:[['8004 м: километры',8],['Оставшиеся метры',4],['184 см: метры',1],['Оставшиеся дециметры',8],['Оставшиеся сантиметры',4],['1207 ц: тонны',120],['Оставшиеся центнеры',7]]},
-{title:'Прямоугольник и квадрат',text:'Найди площадь и периметр прямоугольника со сторонами 5 см и 9 см. Начерти квадрат с таким же периметром и найди его площадь.',drawing:true,fields:[['Площадь прямоугольника, см²',45],['Периметр прямоугольника, см',28],['Сторона квадрата, см',7],['Площадь квадрата, см²',49]]},
-{title:'Урожай картошки',text:'С одного участка рабочие собрали 7 мешков картошки по 35 кг в каждом. Со второго собрали на 124 кг больше. Сколько всего килограммов картошки собрали с обоих участков?',fields:[['Собрали с двух участков, кг',614]]},
-{title:'Периметр и площадь',text:'Найди периметр и площадь прямоугольника, если его длина 9 см, а ширина на 5 см меньше.',fields:[['Периметр, см',26],['Площадь, см²',36]]}
+  {
+    "title": "Пропущенные числа",
+    "text": "Запиши пропущенные числа: 10, __, 8, __, __, 5.",
+    "fields": [
+      [
+        "Первый пропуск",
+        9
+      ],
+      [
+        "Второй пропуск",
+        7
+      ],
+      [
+        "Третий пропуск",
+        6
+      ]
+    ]
+  },
+  {
+    "title": "Вычисли",
+    "text": "",
+    "fields": [
+      [
+        "8 − 2",
+        6
+      ],
+      [
+        "3 + 3",
+        6
+      ],
+      [
+        "7 − 1",
+        6
+      ],
+      [
+        "10 − 2",
+        8
+      ],
+      [
+        "5 + 3",
+        8
+      ]
+    ]
+  },
+  {
+    "title": "Заполни пропуски",
+    "text": "Вставь числа, чтобы равенства стали верными.",
+    "fields": [
+      [
+        "7 = 6 + □",
+        1
+      ],
+      [
+        "5 = 3 + □",
+        2
+      ],
+      [
+        "6 = □ − 1",
+        7
+      ]
+    ]
+  },
+  {
+    "title": "Теремок",
+    "text": "В теремке было 6 зверей. Прибежал волк и поселился с ними в теремке. Сколько зверей стало в теремке?",
+    "fields": [
+      [
+        "Сколько зверей стало?",
+        7
+      ]
+    ]
+  },
+  {
+    "title": "Пропущенные числа",
+    "text": "Запиши пропущенные числа: 9, 8, __, __, 5, __, 3.",
+    "fields": [
+      [
+        "Первый пропуск",
+        7
+      ],
+      [
+        "Второй пропуск",
+        6
+      ],
+      [
+        "Третий пропуск",
+        4
+      ]
+    ]
+  },
+  {
+    "title": "Вычисли",
+    "text": "",
+    "fields": [
+      [
+        "9 − 1",
+        8
+      ],
+      [
+        "4 + 3",
+        7
+      ],
+      [
+        "8 + 2",
+        10
+      ],
+      [
+        "10 − 3",
+        7
+      ],
+      [
+        "7 + 2",
+        9
+      ]
+    ]
+  },
+  {
+    "title": "Заполни пропуски",
+    "text": "Вставь числа, чтобы равенства стали верными.",
+    "fields": [
+      [
+        "6 = 5 + □",
+        1
+      ],
+      [
+        "7 = 2 + □",
+        5
+      ],
+      [
+        "8 = □ − 1",
+        9
+      ]
+    ]
+  },
+  {
+    "title": "Доктор Айболит",
+    "text": "На приём к доктору Айболиту пришли 5 зверей. Он уже принял 2 зверей. Сколько зверей осталось принять доктору Айболиту?",
+    "fields": [
+      [
+        "Сколько зверей осталось принять?",
+        3
+      ]
+    ]
+  },
+  {
+    "title": "Расставь числа по порядку",
+    "text": "Даны числа: 6, 3, 9, 1, 5, 8, 6. Запиши их сначала в порядке увеличения, затем уменьшения. Разделяй числа запятыми или пробелами.",
+    "fields": [
+      [
+        "В порядке увеличения",
+        "1,3,5,6,6,8,9"
+      ],
+      [
+        "В порядке уменьшения",
+        "9,8,6,6,5,3,1"
+      ]
+    ],
+    "sequence": true
+  },
+  {
+    "title": "Сравни",
+    "text": "Поставь знаки >, < или =.",
+    "fields": [
+      [
+        "4 + 1 … 5",
+        "="
+      ],
+      [
+        "2 + 1 … 4",
+        "<"
+      ],
+      [
+        "2 − 1 … 2",
+        "<"
+      ],
+      [
+        "4 − 1 … 3",
+        "="
+      ],
+      [
+        "5 − 1 … 4",
+        "="
+      ],
+      [
+        "3 − 1 … 1",
+        ">"
+      ]
+    ],
+    "compare": true
+  },
+  {
+    "title": "Звенья ломаной",
+    "text": "Сколько звеньев у ломаной на рисунке?",
+    "fields": [
+      [
+        "Сколько звеньев?",
+        5
+      ]
+    ],
+    "image": "assets/task-11.png",
+    "imageAlt": "Незамкнутая ломаная линия"
+  },
+  {
+    "title": "Вставь нужную цифру",
+    "text": "",
+    "fields": [
+      [
+        "2 + □ = 5",
+        3
+      ],
+      [
+        "5 − □ = 3",
+        2
+      ],
+      [
+        "0 + □ = 6",
+        6
+      ],
+      [
+        "□ + 7 = 9",
+        2
+      ],
+      [
+        "7 − □ = 0",
+        7
+      ],
+      [
+        "□ − 3 = 3",
+        6
+      ]
+    ]
+  },
+  {
+    "title": "Назови линии",
+    "text": "Соотнеси фигуры с названиями. Рассмотри четыре линии слева направо и выбери название каждой.",
+    "fields": [
+      [
+        "Линия 1 слева",
+        "Луч",
+        [
+          "Отрезок",
+          "Кривая",
+          "Прямая",
+          "Луч"
+        ]
+      ],
+      [
+        "Линия 2 слева",
+        "Прямая",
+        [
+          "Отрезок",
+          "Кривая",
+          "Прямая",
+          "Луч"
+        ]
+      ],
+      [
+        "Линия 3 слева",
+        "Отрезок",
+        [
+          "Отрезок",
+          "Кривая",
+          "Прямая",
+          "Луч"
+        ]
+      ],
+      [
+        "Линия 4 слева",
+        "Кривая",
+        [
+          "Отрезок",
+          "Кривая",
+          "Прямая",
+          "Луч"
+        ]
+      ]
+    ],
+    "image": "assets/task-13.png",
+    "imageAlt": "Четыре линии для сопоставления с названиями"
+  },
+  {
+    "title": "Продолжи ряд",
+    "text": "Найди закономерность и заполни пропуски в каждом ряду.",
+    "fields": [
+      [
+        "1, □, 3, □, 5, 6, 7, 8: первый пропуск",
+        2
+      ],
+      [
+        "Второй пропуск",
+        4
+      ],
+      [
+        "11, 9, 7, □, □, □: первый пропуск",
+        5
+      ],
+      [
+        "Второй пропуск во втором ряду",
+        3
+      ],
+      [
+        "Третий пропуск во втором ряду",
+        1
+      ]
+    ]
+  },
+  {
+    "title": "Выбери знак",
+    "text": "Вставь нужный знак «+» или «−».",
+    "fields": [
+      [
+        "2 … 3 = 5",
+        "+",
+        [
+          "+",
+          "−"
+        ]
+      ],
+      [
+        "6 … 2 = 4",
+        "−",
+        [
+          "+",
+          "−"
+        ]
+      ],
+      [
+        "7 … 1 = 8",
+        "+",
+        [
+          "+",
+          "−"
+        ]
+      ],
+      [
+        "8 … 2 = 6",
+        "−",
+        [
+          "+",
+          "−"
+        ]
+      ]
+    ]
+  },
+  {
+    "title": "Щенки во дворе",
+    "text": "Во дворе гуляли 3 щенка. К ним примчались ещё 2 щенка. Сколько щенков стало во дворе?",
+    "fields": [
+      [
+        "Сколько щенков стало?",
+        5
+      ]
+    ]
+  },
+  {
+    "title": "Гусята на озере",
+    "text": "В озере плавали 5 гусят. К ним подплыли ещё 3 гусёнка. Сколько гусят плавает в озере?",
+    "fields": [
+      [
+        "Сколько гусят плавает?",
+        8
+      ]
+    ]
+  },
+  {
+    "title": "Реши примеры",
+    "text": "",
+    "fields": [
+      [
+        "2 + 3",
+        5
+      ],
+      [
+        "5 − 2",
+        3
+      ],
+      [
+        "4 + 2",
+        6
+      ],
+      [
+        "4 − 2",
+        2
+      ]
+    ]
+  },
+  {
+    "title": "Заполни пропуски знаками",
+    "text": "Выбери «+» или «−», чтобы равенства стали верными.",
+    "fields": [
+      [
+        "6 … 3 = 3",
+        "−",
+        [
+          "+",
+          "−"
+        ]
+      ],
+      [
+        "6 … 2 = 4",
+        "−",
+        [
+          "+",
+          "−"
+        ]
+      ],
+      [
+        "3 … 1 = 2",
+        "−",
+        [
+          "+",
+          "−"
+        ]
+      ],
+      [
+        "2 … 2 = 4",
+        "+",
+        [
+          "+",
+          "−"
+        ]
+      ]
+    ]
+  },
+  {
+    "title": "Выполни действия",
+    "text": "Вычисли и запиши ответы.",
+    "fields": [
+      [
+        "7 + 1",
+        8
+      ],
+      [
+        "4 − 3",
+        1
+      ],
+      [
+        "6 − 1",
+        5
+      ],
+      [
+        "3 − 1",
+        2
+      ],
+      [
+        "9 + 1",
+        10
+      ],
+      [
+        "6 + 1",
+        7
+      ],
+      [
+        "2 + 2",
+        4
+      ],
+      [
+        "5 − 2",
+        3
+      ],
+      [
+        "5 − 3",
+        2
+      ],
+      [
+        "7 − 1",
+        6
+      ]
+    ]
+  }
 ];
-[0,4,5,6,7,12,15,17,18,19].forEach(n=>tasks[n].title='Реши задачу');
-let taskProgress={};try{const t=JSON.parse(localStorage.getItem(key+'-tasks')||'{}');if(t&&typeof t==='object'&&!Array.isArray(t))taskProgress=t}catch{}
-function storeTasks(){try{localStorage.setItem(key+'-tasks',JSON.stringify(taskProgress))}catch{$('hint').textContent='Браузер не разрешает сохранение ответов.'}}
-function normalizeAnswer(v){return String(v).trim().replace(/\s/g,'').replace(',','.').toLowerCase()}
+let taskProgress={};try{const t=JSON.parse(localStorage.getItem(key+'-tasks-grade1-v1')||'{}');if(t&&typeof t==='object'&&!Array.isArray(t))taskProgress=t}catch{}
+function storeTasks(){try{localStorage.setItem(key+'-tasks-grade1-v1',JSON.stringify(taskProgress))}catch{$('hint').textContent='Браузер не разрешает сохранение ответов.'}}
+function normalizeAnswer(v){return String(v).trim().replace(/\s/g,'').replace(',','.').replace(/[−–]/g,'-').toLowerCase()}
 function buildScratchpad(n,form,controls,isDrawing){const details=document.createElement('section');details.className='scratchpad';const summary=document.createElement('h3');summary.className='scratch-title';summary.textContent='✎ Черновик';const toolbar=document.createElement('div');toolbar.className='scratch-tools';toolbar.setAttribute('role','group');toolbar.setAttribute('aria-label','Инструменты черновика');const pencil=document.createElement('button'),eraser=document.createElement('button'),clear=document.createElement('button');for(const b of [pencil,eraser,clear])b.type='button';pencil.textContent='✎ Карандаш';eraser.textContent='▱ Ластик';clear.textContent='🗑 Корзина';clear.setAttribute('aria-label','Очистить черновик этого задания');pencil.setAttribute('aria-pressed','true');eraser.setAttribute('aria-pressed','false');toolbar.append(pencil,eraser,clear);const canvas=document.createElement('canvas');canvas.width=800;canvas.height=300;canvas.setAttribute('aria-label','Черновик задания '+(n+1)+'. Рисуйте мышью, пальцем или стилусом.');const note=document.createElement('p');note.className='scratch-note';note.textContent=isDrawing?'Здесь можно выполнить чертёж. Чертёж проверяется самостоятельно.':'Для вычислений и заметок. Записи сохраняются отдельно для каждого задания.';details.append(summary,note,canvas,toolbar);form.append(details);const c=canvas.getContext('2d');c.lineCap='round';c.lineJoin='round';let tool='pencil',active=false,revision=0;function selectTool(next){tool=next;pencil.setAttribute('aria-pressed',String(next==='pencil'));eraser.setAttribute('aria-pressed',String(next==='eraser'));canvas.style.cursor=next==='eraser'?'cell':'crosshair'}pencil.onclick=()=>selectTool('pencil');eraser.onclick=()=>selectTool('eraser');const point=e=>{const r=canvas.getBoundingClientRect();return[(e.clientX-r.left)*canvas.width/r.width,(e.clientY-r.top)*canvas.height/r.height]};const persist=()=>{taskProgress[n]={...taskProgress[n],values:controls.map(e=>e.value),drawing:canvas.toDataURL()};storeTasks()};const drawing=taskProgress[n]?.drawing;if(typeof drawing==='string'&&drawing.startsWith('data:image/png;base64,')){const im=new Image();im.onload=()=>{if(revision===0)c.drawImage(im,0,0)};im.src=drawing}canvas.onpointerdown=e=>{e.preventDefault();revision++;active=true;canvas.setPointerCapture(e.pointerId);c.globalCompositeOperation=tool==='eraser'?'destination-out':'source-over';c.strokeStyle='#193d30';c.lineWidth=tool==='eraser'?30:3;const[x,y]=point(e);c.beginPath();c.moveTo(x,y);c.lineTo(x+.01,y+.01);c.stroke()};canvas.onpointermove=e=>{if(!active)return;e.preventDefault();c.lineTo(...point(e));c.stroke()};const finish=()=>{if(active){active=false;persist()}};canvas.onpointerup=canvas.onpointercancel=canvas.onlostpointercapture=finish;clear.onclick=()=>{revision++;active=false;c.clearRect(0,0,canvas.width,canvas.height);persist()};selectTool('pencil')}
-function buildTask(n){const task=tasks[n],host=$('task-content');host.replaceChildren();host.hidden=false;const form=document.createElement('form');form.className='task-form'+(task.fields.length===1?' single-answer':'');const saved=taskProgress[n]||{};const controls=[];task.fields.forEach(([label,answer,options],i)=>{const row=document.createElement('label');row.className='answer-row';const caption=document.createElement('span');caption.textContent=label;const input=document.createElement(task.compare||options?'select':'input');input.id=`answer-${n}-${i}`;input.required=true;if(input.tagName==='SELECT'){const blank=new Option('Выбери…','');input.add(blank);for(const value of (task.compare?['>','<','=']:options))input.add(new Option(value,value))}else{input.type='text';input.inputMode='decimal';input.autocomplete='off';input.placeholder='Ответ'}input.value=Array.isArray(saved.values)?saved.values[i]||'':'';input.disabled=!!saved.solved;row.append(caption,input);if(task.fields.length===1){row.classList.add('answer-bar');caption.classList.add('visually-hidden');const unit=document.createElement('span');unit.className='answer-unit';unit.textContent=label.match(/(?:, )(кг|л)$/)?.[1]||(label==='Деревянных домов'?'домов':label==='Во сколько раз?'?'раз':'');row.append(unit)}form.append(row);controls.push(input);input.addEventListener('input',()=>{input.removeAttribute('aria-invalid');row.classList.remove('incorrect');taskProgress[n]={values:controls.map(e=>e.value),solved:false,drawing:taskProgress[n]?.drawing};storeTasks()})});
+function buildTask(n){const task=tasks[n],host=$('task-content');host.replaceChildren();host.hidden=false;if(task.image){const image=document.createElement('img');image.className='task-illustration';image.src=task.image;image.alt=task.imageAlt;host.append(image)}const form=document.createElement('form');form.className='task-form'+(task.fields.length===1?' single-answer':'');const saved=taskProgress[n]||{};const controls=[];task.fields.forEach(([label,answer,options],i)=>{const row=document.createElement('label');row.className='answer-row';const caption=document.createElement('span');caption.textContent=label;const input=document.createElement(task.compare||options?'select':'input');input.id=`answer-${n}-${i}`;input.required=true;if(input.tagName==='SELECT'){const blank=new Option('Выбери…','');input.add(blank);for(const value of (task.compare?['>','<','=']:options))input.add(new Option(value,value))}else{input.type='text';input.inputMode=task.sequence?'text':'decimal';input.autocomplete='off';input.placeholder='Ответ'}input.value=Array.isArray(saved.values)?saved.values[i]||'':'';input.disabled=!!saved.solved;row.append(caption,input);if(task.fields.length===1){row.classList.add('answer-bar');caption.classList.add('visually-hidden');const unit=document.createElement('span');unit.className='answer-unit';unit.textContent=label.match(/(?:, )(кг|л)$/)?.[1]||(label==='Деревянных домов'?'домов':label==='Во сколько раз?'?'раз':'');row.append(unit)}form.append(row);controls.push(input);input.addEventListener('input',()=>{input.removeAttribute('aria-invalid');row.classList.remove('incorrect');taskProgress[n]={values:controls.map(e=>e.value),solved:false,drawing:taskProgress[n]?.drawing};storeTasks()})});
 buildScratchpad(n,form,controls,task.drawing);
-const feedback=document.createElement('p');feedback.className='task-feedback';feedback.setAttribute('role','status');const check=document.createElement('button');check.type='submit';check.className='check-task';check.textContent=saved.solved?'✓ Задание выполнено':'Проверить';check.disabled=!!saved.solved;feedback.textContent=saved.solved?'Верно! Все ответы сохранены.':'';form.append(check,feedback);form.onsubmit=e=>{e.preventDefault();let correct=true;controls.forEach((input,i)=>{const ok=normalizeAnswer(input.value)===normalizeAnswer(task.fields[i][1]);input.setAttribute('aria-invalid',String(!ok));input.parentElement.classList.toggle('incorrect',!ok);if(!ok)correct=false});taskProgress[n]={...taskProgress[n],values:controls.map(e=>e.value),solved:correct};storeTasks();feedback.textContent=correct?'Верно! Задание выполнено.':'Проверь выделенные ответы и попробуй ещё раз.';feedback.classList.toggle('success',correct);if(correct){controls.forEach(i=>i.disabled=true);check.disabled=true;check.textContent='✓ Задание выполнено';tone()}};host.append(form)}
+const feedback=document.createElement('p');feedback.className='task-feedback';feedback.setAttribute('role','status');const check=document.createElement('button');check.type='submit';check.className='check-task';check.textContent=saved.solved?'✓ Задание выполнено':'Проверить';check.disabled=!!saved.solved;feedback.textContent=saved.solved?'Верно! Все ответы сохранены.':'';form.append(check,feedback);form.onsubmit=e=>{e.preventDefault();let correct=true;controls.forEach((input,i)=>{const normalize=task.sequence?v=>String(v).trim().replace(/[\s;,]+/g,','):normalizeAnswer;const ok=normalize(input.value)===normalize(task.fields[i][1]);input.setAttribute('aria-invalid',String(!ok));input.parentElement.classList.toggle('incorrect',!ok);if(!ok)correct=false});taskProgress[n]={...taskProgress[n],values:controls.map(e=>e.value),solved:correct};storeTasks();feedback.textContent=correct?'Верно! Задание выполнено.':'Проверь выделенные ответы и попробуй ещё раз.';feedback.classList.toggle('success',correct);if(correct){controls.forEach(i=>i.disabled=true);check.disabled=true;check.textContent='✓ Задание выполнено';tone()}};host.append(form)}
 
 function showWindowContent(i){$('modal').classList.remove('victory-card');const gift=i%2===0;$('modal-icon').textContent=gift?'🎁':'✉️';$('modal-kicker').textContent=`СЮРПРИЗ ${windowNumber(i)}`;$('modal-title').textContent=gift?'Маленькая радость для тебя':'Добавим немного волшебства';const n=Math.floor(i/2);$('task-content').replaceChildren();$('task-content').hidden=gift;$('modal').classList.toggle('task-card',!gift);$('close').textContent=gift?'Чудесно!':'×';$('close').setAttribute('aria-label',gift?'Закрыть подарок':'Закрыть задание');if(gift){const item=giftItems[n];$('gift-item').hidden=!item;$('modal-icon').hidden=!!item;if(item){$('gift-item').src=item.image;$('gift-item').alt=item.title;$('modal-title').textContent=item.title}$('modal-text').textContent=item?item.caption:giftTexts[n];$('modal-text').hidden=false}else{$('gift-item').hidden=true;$('modal-icon').hidden=false;$('modal-title').textContent=tasks[n].title;$('modal-text').textContent=tasks[n].text||'';$('modal-text').hidden=!tasks[n].text;buildTask(n)}$('modal').show();$('close').focus()}
 function openWindow(i){if($('modal').open)return;const fresh=!opened.has(i),gift=i%2===0;opened.add(i);save();render();if(fresh){tone();if(gift)confetti()}if(opened.size===40)$('hint').textContent='✦ Все 40 окошек открыты! Пусть волшебство останется с тобой.';if(fresh)playReaction(gift?'gift-reaction':'task-reaction',()=>{});showWindowContent(i)}
