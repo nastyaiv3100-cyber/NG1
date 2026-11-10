@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 180" width="360" height="180" role="img" aria-labelledby="title">
+  <title id="title">Незамкнутая ломаная линия</title>
+  <rect width="360" height="180" rx="12" fill="#fff9ed"/>
+  <polyline points="110,25 35,65 170,65 170,145 310,145 270,45" fill="none" stroke="#60331f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
