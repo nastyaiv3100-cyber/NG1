@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Новогодние чудеса · Петерсон</title>
+<style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#5b2e1b;color:#fff3da;font:18px Arial,sans-serif}
+</style>
+</head>
+<body>
+Загружаем новогодние чудеса…
+<script>
+(async()=>{
+const data=[
+{"kind":"houses","title":"Заполни домики","text":"Выполни действие под крышей и заполни клетки.","houses":[[2,[2,5,8]],[-2,[9,6,4]],[3,[3,6]],[-3,[8,7]]]},
+{"kind":"chain","title":"Вычисли по цепочке","text":"Заполни кружки по порядку и запиши результат выражения.","start":3,"ops":[2,-1,3,-2,4]},
+{"kind":"errors","title":"Найди ошибки","text":"Проверь каждую запись.","items":[["2 + 4 = 6","Верно"],["7 − 3 = 4","Верно"],["3 + 2 = 4","Ошибка"],["6 − 4 = 2","Верно"],["1 + 5 = 7","Ошибка"],["8 − 2 = 6","Верно"],["2 < 7","Верно"],["5 > 8","Ошибка"],["9 > 4","Верно"]]},
+{"kind":"numberline","title":"Вычисли по числовому отрезку","text":"Используй числовой отрезок и запиши ответы.","exprs":[[2,4,1],[8,-3,1]]},
+{"kind":"compare","title":"Сравни числа","text":"Выбери знаки >, < или =.","pairs":[[7,3],[2,6],[4,4],[9,5]]},
+{"kind":"table","title":"Заполни таблицу","text":"Найди неизвестные слагаемые и суммы.","op":"+","rows":[[3,4,null],[2,5,null],[null,2,10],[6,null,9]]},
+{"kind":"cipher","title":"Расшифруй слово","text":"Вычисли. Расположи буквы по возрастанию ответов и запиши слово.","rows":[[[2,4,-3],"Д"],[[7,-4,2],"Н"],[[4,2,-5],"Р"],[[8,-5,3],"А"],[[9,-6,1],"И"],[[3,4,-5],"О"]]},
+{"kind":"table","title":"Заполни таблицу","text":"Найди уменьшаемое, вычитаемое и разность.","op":"−","rows":[[9,3,null],[7,2,null],[8,null,3],[null,1,6]]},
+{"kind":"signs","title":"Выбери знаки","text":"Поставь «+» или «−», чтобы равенства стали верными.","rows":[[6,2,1,3],[2,4,1,5],[8,3,2,7],[3,2,1,6],[7,4,2,5],[4,3,2,5]]},
+{"kind":"numberline","title":"Вычисли по числовому отрезку","text":"Вычисли и проверь ответы на числовом отрезке.","exprs":[[4,2,-3],[7,-4,2]]},
+{"kind":"partition","title":"Разбей фигуры на группы","text":"Найди признак разбиения и заполни выражения."},
+{"kind":"pictures","title":"Составь выражения по рисункам","text":"Сосчитай фигуры. Зачёркнутые фигуры вычитай.","cards":[[7,3,"−","triangle"],[3,2,"+","circle"],[8,5,"−","oval"],[4,2,"+","triangle"]]},
+{"kind":"numberline-grid","title":"Вычисли и проверь","text":"Вычисли и сделай проверку на числовом отрезке.","exprs":[[3,2,2],[6,-2,-1],[4,1,-3],[5,-2,4],[2,5,-4],[1,3,4],[8,-5,2],[3,4,-2],[2,6,-3]]},
+{"kind":"houses","title":"Заполни домики","text":"Выполни действие под каждой крышей.","houses":[[1,[4,7]],[-1,[8,3]],[4,[2,5]],[-4,[9,6]]]},
+{"kind":"chain","title":"Вычисли по цепочке","text":"Выполни действия по порядку и заполни кружки.","start":6,"ops":[-2,3,-4,2,3]},
+{"kind":"table","title":"Заполни таблицу","text":"Восстанови пропущенные слагаемые и суммы.","op":"+","rows":[[1,6,null],[3,5,null],[null,4,9],[7,null,10]]},
+{"kind":"table","title":"Заполни таблицу","text":"Восстанови пропущенные числа.","op":"−","rows":[[10,4,null],[8,5,null],[9,null,7],[null,3,5]]},
+{"kind":"signs","title":"Выбери знаки","text":"Выбери действия, чтобы получить верные равенства.","rows":[[5,2,1,8],[9,3,2,4],[4,3,2,5],[8,4,3,7],[2,5,1,6],[7,2,4,9]]},
+{"kind":"compare","title":"Сравни выражения","text":"Вычисли и выбери нужный знак.","pairs":[[[3,2],6],[[8,-3],4],[[2,4],6],[[9,-5],5],[[1,6],7],[[10,-3],5]]},
+{"kind":"sequences","title":"Заполни пропуски","text":"Найди закономерность и запиши числа в окошках.","rows":[[1,null,3,null,5,null,7],[10,9,null,7,null,5],[0,2,null,6,null,10],[9,7,null,3,null]],"answers":[[2,4,6],[8,6],[4,8],[5,1]]}
+];
+
+function makeBoard(t,F){
+ const E=(tag,c="",text)=>{
+  const e=document.createElement(tag);
+  e.className=c;
+  if(text!==undefined)e.textContent=text;
+  return e;
+ };
+ const S=(m,v="0 0 380 80")=>{
+  const e=document.createElementNS("http://www.w3.org/2000/svg","svg");
+  e.setAttribute("viewBox",v);
+  e.setAttribute("aria-hidden","true");
+  e.innerHTML=m;
+  return e;
+ };
+ const A=(p,...xs)=>xs.forEach(x=>
+  p.append(typeof x==="object"?x:document.createTextNode(String(x)))
+ );
+ const sum=a=>a.reduce((x,y)=>x+y,0);
+ const expr=a=>a.map((v,i)=>
+  i?(v<0?" − ":" + ")+Math.abs(v):v
+ ).join("");
+
+ const line=start=>{
+  let m='<path d="M20 30H360" stroke="currentColor" stroke-width="2"/>';
+  for(let i=0;i<=10;i++){
+   const x=20+i*34;
+   m+=`<path d="M${x} 24V36" stroke="currentColor"/>
+   <text x="${x}" y="60" text-anchor="middle" fill="currentColor" font-size="16">${i}</text>`;
+  }
+  if(start!==undefined){
+   m+=`<circle cx="${20+start*34}" cy="30" r="5" fill="#ff9479"/>`;
+  }
+  return S(m);
+ };
+
+ const shape=(type,color,x,y,z=25,cross=false)=>{
+  let m;
+  if(type==="triangle"){
+   m=`<path d="M${x} ${y-z*.6}L${x-z*.6} ${y+z*.5}H${x+z*.6}Z" fill="${color}"/>`;
+  }else if(type==="square"||type==="rect"){
+   m=`<rect x="${x-z/2}" y="${y-z/2}" width="${z}" height="${type==="rect"?z*1.3:z}" fill="${color}"/>`;
+  }else{
+   m=`<ellipse cx="${x}" cy="${y}" rx="${z/2}" ry="${type==="oval"?z*.7:z/2}" fill="${color}"/>`;
+  }
+  if(cross){
+   m+=`<path d="M${x-z*.7} ${y-z*.7}L${x+z*.7} ${y+z*.7}" stroke="#fff1d3" stroke-width="3"/>`;
+  }
+  return m;
+ };
+
+ const board=E("div","p-board");
+ const grid=(cls="")=>{
+  const e=E("div","p-grid "+cls);
+  board.append(e);
+  return e;
+ };
+ const eq=(parent,a)=>{
+  const r=E("div","p-eq");
+  A(r,expr(a)+" = ",F(sum(a)));
+  parent.append(r);
+ };
+
+ if(t.kind==="houses"){
+  const g=grid("p-houses");
+  t.houses.forEach(([op,values])=>{
+   const house=E("section","p-house");
+   house.append(S(`
+    <path d="M6 58C6 -8 114 -8 114 58Z" fill="none" stroke="currentColor" stroke-width="2"/>
+    <text x="60" y="29" text-anchor="middle" fill="currentColor" font-size="22">${op>0?"+":"−"}${Math.abs(op)}</text>
+    <path d="M30 50Q60 23 90 50M79 47L90 50L86 39" stroke="#ff987c" stroke-width="2" fill="none"/>
+   `,"0 0 120 60"));
+   const table=E("table");
+   values.forEach(v=>{
+    const tr=E("tr"),td=E("td");
+    td.append(F(v+op));
+    tr.append(E("td","",v),td);
+    table.append(tr);
+   });
+   house.append(table);
+   g.append(house);
+  });
+
+ }else if(t.kind==="chain"){
+  const chain=E("div","p-chain");
+  chain.append(E("span","p-circle",t.start));
+  let v=t.start;
+  t.ops.forEach(op=>{
+   v+=op;
+   const step=E("span","p-step"),arrow=E("span","p-arrow");
+   arrow.append(
+    E("small","",(op>0?"+":"−")+Math.abs(op)),
+    E("span","","→")
+   );
+   const c=E("span","p-circle");
+   c.append(F(v));
+   step.append(arrow,c);
+   chain.append(step);
+  });
+  board.append(chain);
+  eq(board,[t.start,...t.ops]);
+
+ }else if(t.kind==="errors"){
+  const g=grid("p-errors");
+  t.items.forEach(([s,a])=>{
+   const r=E("div","p-eq");
+   A(r,s," ",F(a,["Верно","Ошибка"]));
+   g.append(r);
+  });
+
+ }else if(t.kind.startsWith("numberline")){
+  const g=grid(t.kind==="numberline-grid"?"p-three":"");
+  if(t.kind==="numberline-grid")board.prepend(line());
+  t.exprs.forEach(a=>{
+   const card=E("section","p-card");
+   if(t.kind==="numberline")card.append(line(a[0]));
+   eq(card,a);
+   g.append(card);
+  });
+
+ }else if(t.kind==="compare"){
+  if(typeof t.pairs[0][0]==="number")board.append(line());
+  const g=grid();
+  t.pairs.forEach(([a,b])=>{
+   const x=Array.isArray(a)?sum(a):a,r=E("div","p-eq");
+   A(
+    r,
+    Array.isArray(a)?expr(a):a,
+    F(x>b?">":x<b?"<":"=",[">","<","="]),
+    b
+   );
+   g.append(r);
+  });
+
+ }else if(t.kind==="table"){
+  const table=E("table","p-table"),head=E("tr");
+  const names=t.op==="+"?
+   ["Слагаемое","Слагаемое","Сумма"]:
+   ["Уменьшаемое","Вычитаемое","Разность"];
+  names.forEach(v=>head.append(E("th","",v)));
+  table.append(head);
+
+  t.rows.forEach(row=>{
+   let [a,b,c]=row;
+   if(t.op==="+"){
+    if(a===null)a=c-b;
+    else if(b===null)b=c-a;
+    else c=a+b;
+   }else{
+    if(a===null)a=b+c;
+    else if(b===null)b=a-c;
+    else c=a-b;
+   }
+   const tr=E("tr");
+   row.forEach((v,i)=>{
+    const td=E("td");
+    A(td,v===null?F([a,b,c][i]):v);
+    tr.append(td);
+   });
+   table.append(tr);
+  });
+  board.append(table);
+
+ }else if(t.kind==="cipher"){
+  const g=grid();
+  t.rows.forEach(([a,letter])=>{
+   const r=E("div","p-eq");
+   A(r,expr(a)+" = ",F(sum(a)),E("b","p-letter",letter));
+   g.append(r);
+  });
+  board.append(E("p","p-note","Слово:"));
+  const word=E("div","p-word");
+  t.rows.slice().sort((a,b)=>sum(a[0])-sum(b[0])).forEach((r,i)=>{
+   const cell=E("div","p-word-cell");
+   cell.append(E("small","",i+1),F(r[1],null,true));
+   word.append(cell);
+  });
+  board.append(word);
+
+ }else if(t.kind==="signs"){
+  const g=grid();
+  t.rows.forEach(([a,b,c,result])=>{
+   let ans;
+   for(const x of [1,-1]){
+    for(const y of [1,-1]){
+     if(a+x*b>=0&&a+x*b<=10&&a+x*b+y*c===result){
+      ans=[x>0?"+":"−",y>0?"+":"−"];
+     }
+    }
+   }
+   const r=E("div","p-eq");
+   A(r,a,F(ans[0],["+","−"]),b,F(ans[1],["+","−"]),c+" = "+result);
+   g.append(r);
+  });
+
+ }else if(t.kind==="sequences"){
+  t.rows.forEach((a,i)=>{
+   let j=0;
+   const r=E("div","p-eq");
+   a.forEach((v,k)=>{
+    if(k)A(r,", ");
+    A(r,v===null?F(t.answers[i][j++]):v);
+   });
+   board.append(r);
+  });
+
+ }else if(t.kind==="pictures"){
+  const g=grid();
+  t.cards.forEach(([a,b,op,type],i)=>{
+   const card=E("section","p-card");
+   let m='<rect x="3" y="3" width="274" height="160" rx="20" fill="none" stroke="currentColor"/>';
+   const amount=op==="−"?a:a+b;
+   for(let j=0;j<amount;j++){
+    const x=38+j%4*67,y=amount>4?43+Math.floor(j/4)*72:82;
+    const figure=op==="−"?type:j<a?type:"rect";
+    const color=op==="−"?
+     (type==="oval"?"#8ec78c":"#75ade5"):
+     j<a?"#ffe16d":"#ef7861";
+    m+=shape(figure,color,x,y,25,op==="−"&&j<b);
+   }
+   card.append(S(m,"0 0 280 168"));
+   const r=E("div","p-eq");
+   A(r,i<2?a:F(a),op,i<2?b:F(b),"=",F(op==="−"?a-b:a+b));
+   card.append(r);
+   g.append(card);
+  });
+
+ }else if(t.kind==="partition"){
+  const shapes=[
+   ["square","#ef7861",true],
+   ["circle","#ef7861",true],
+   ["square","#ef7861",false],
+   ["circle","#75ade5",true],
+   ["square","#75ade5",false],
+   ["circle","#75ade5",false],
+   ["square","#ffe16d",false],
+   ["circle","#ffe16d",false]
+  ];
+  const groups=[
+   {name:"Размер",sets:[shapes.filter(x=>x[2]),shapes.filter(x=>!x[2])]},
+   {name:"Форма",sets:[shapes.filter(x=>x[0]==="square"),shapes.filter(x=>x[0]==="circle")]},
+   {name:"Цвет",sets:["#ef7861","#75ade5","#ffe16d"].map(c=>shapes.filter(x=>x[1]===c))}
+  ];
+  const g=grid("p-partitions");
+  groups.forEach(group=>{
+   const card=E("section","p-card");
+   let m="";
+   const width=300/group.sets.length;
+   group.sets.forEach((set,i)=>{
+    m+=`<rect x="${i*width+3}" y="3" width="${width-6}" height="182" rx="${width/2}" fill="none" stroke="currentColor"/>`;
+    const cols=set.length>3?2:1,rows=Math.ceil(set.length/cols);
+    set.forEach(([type,color,big],j)=>{
+     m+=shape(
+      type,color,
+      i*width+width*(j%cols+1)/(cols+1),
+      20+Math.floor(j/cols)*150/rows+75/rows,
+      big?31:22
+     );
+    });
+   });
+   card.append(S(m,"0 0 300 190"));
+   const criterion=E("div","p-eq");
+   A(criterion,"Признак: ",F(group.name,["Размер","Форма","Цвет"]));
+   card.append(criterion);
+   const r=E("div","p-eq");
+   group.sets.forEach((set,i)=>{
+    if(i)A(r,"+");
+    A(r,F(set.length));
+   });
+   A(r,"=",F(8));
+   card.append(r);
+   g.append(card);
+  });
+ }
+
+ return board;
+}
+
+function decoratePeterson(){
+ const originalBuild=buildTask;
+ buildTask=function(n){
+  originalBuild(n);
+  const host=document.getElementById("task-content");
+  const answers=host.querySelector(".task-answers");
+  if(!answers)throw Error("Не найден блок ответов");
+
+  const inputs=[...answers.querySelectorAll("input,select")];
+  const rows=inputs.map(e=>e.closest(".answer-row"));
+  let i=0;
+
+  const board=makeBoard(tasks[n],(answer,options,letter)=>{
+   const input=inputs[i],row=rows[i];
+   input.setAttribute("aria-label","Ответ "+(++i));
+   input.placeholder="";
+   row.className="answer-row p-slot";
+   row.replaceChildren(input);
+   if(letter){
+    input.inputMode="text";
+    input.maxLength=1;
+   }
+   return row;
+  });
+
+  if(i!==inputs.length)throw Error("Не совпало количество полей");
+  answers.className="task-answers p-body";
+  answers.replaceChildren(board);
+ };
+}
+
+for(const t of data){
+ t.fields=[];
+ makeBoard(t,(answer,options)=>{
+  t.fields.push(["Ответ "+(t.fields.length+1),answer,options||null]);
+  return document.createElement("span");
+ });
+}
+
+const response=await fetch(
+ new URL("../index.html",location.href),
+ {cache:"no-store"}
+);
+if(!response.ok){
+ throw Error("Не удалось загрузить основную игру: "+response.status);
+}
+
+let page=await response.text();
+const start=page.indexOf("const tasks=");
+const end=page.indexOf("let taskProgress={};",start);
+
+if(
+ start<0||
+ end<0||
+ !page.includes("function showWindowContent(")||
+ !page.includes(".task-answers")
+){
+ throw Error("Структура основной игры изменилась");
+}
+
+page=
+ page.slice(0,start)+
+ "const tasks="+JSON.stringify(data)+";function placeSequenceGaps(){}\n"+
+ page.slice(end);
+
+if(!page.includes("const key='winter-windows-v1'")){
+ throw Error("Не найден ключ сохранений");
+}
+
+page=page.replace(
+ "const key='winter-windows-v1'",
+ "const key='winter-windows-peterson-v1'"
+);
+page=page.replace(/(['"(])assets\//g,"$1../assets/");
+
+const hook=page.indexOf("function showWindowContent(");
+page=
+ page.slice(0,hook)+
+ makeBoard.toString()+"\n"+
+ decoratePeterson.toString()+
+ "\ndecoratePeterson();\n"+
+ page.slice(hook);
+
+page=page
+ .replace(/<title>.*?<\/title>/,"<title>Новогодние чудеса · Петерсон</title>")
+ .replace("Твои 40 чудес","Твои новогодние чудеса")
+ .replace("Выбирай окошко — и открывай сюрприз","Счёт до 10 · 20 заданий");
+
+const styles=`
+#modal.task-card .p-body,#modal.task-card .p-board{
+ display:flex;flex-direction:column;gap:16px;width:100%;min-width:0
+}
+#modal.task-card .p-grid{
+ display:grid;grid-template-columns:minmax(0,1fr);gap:14px 20px;min-width:0
+}
+#modal.task-card .p-grid>*{min-width:0}
+#modal.task-card .p-eq{
+ display:flex;align-items:center;flex-wrap:wrap;gap:7px;font-size:19px;line-height:1.7
+}
+#modal.task-card .answer-row.p-slot{
+ display:inline-flex;flex:0 0 auto;align-items:center;width:auto;margin:0;padding:0;gap:0
+}
+#modal.task-card .p-slot input,#modal.task-card .p-slot select{
+ width:52px;min-width:0;height:42px;padding:5px;border:2px solid #dfb77d;
+ border-radius:8px;background:#fff6e5;color:#4b281b;text-align:center;font-size:19px
+}
+#modal.task-card .p-slot select{width:64px}
+#modal.task-card .p-slot input[aria-invalid=true],
+#modal.task-card .p-slot select[aria-invalid=true]{
+ background:#ffe0de;border-color:#d83232;color:#7c1717
+}
+#modal.task-card .p-slot input[aria-invalid=false],
+#modal.task-card .p-slot select[aria-invalid=false]{
+ background:#dff5df;border-color:#329445;color:#155d27;
+ -webkit-text-fill-color:#155d27
+}
+#modal.task-card .p-board svg{
+ display:block;width:100%;height:auto;max-height:190px;color:#fff0d2
+}
+#modal.task-card .p-houses{
+ grid-template-columns:repeat(2,minmax(0,1fr));align-items:start
+}
+#modal.task-card .p-house{
+ width:100%;max-width:165px;justify-self:center
+}
+#modal.task-card .p-house table,#modal.task-card .p-table{
+ border-collapse:collapse;width:100%;text-align:center
+}
+#modal.task-card .p-house td,
+#modal.task-card .p-table td,
+#modal.task-card .p-table th{
+ border:1.5px solid #efc88f;padding:7px 4px;font-size:21px
+}
+#modal.task-card .p-table th{
+ font-size:clamp(10px,2.5cqw,15px);text-transform:uppercase;overflow-wrap:anywhere
+}
+#modal.task-card .p-table{max-width:650px;align-self:center}
+#modal.task-card .p-house input{width:45px;height:36px}
+#modal.task-card .p-chain,#modal.task-card .p-step{
+ display:flex;align-items:center;flex-wrap:wrap;gap:9px
+}
+#modal.task-card .p-circle{
+ display:inline-flex;align-items:center;justify-content:center;flex:0 0 46px;
+ width:46px;height:46px;border:2px solid #eec48a;border-radius:50%;font-size:22px
+}
+#modal.task-card .p-circle input{
+ width:42px;height:42px;border:0;border-radius:50%
+}
+#modal.task-card .p-arrow{
+ display:flex;flex-direction:column;align-items:center;
+ font-size:24px;line-height:1.1;color:#ffd08c
+}
+#modal.task-card .p-arrow small{font-size:15px}
+#modal.task-card .p-card{display:flex;flex-direction:column;gap:12px}
+#modal.task-card .p-letter{
+ padding:2px 7px;border:1px solid #efc58b;border-radius:5px;color:#ffe0ab
+}
+#modal.task-card .p-word{
+ display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;
+ width:100%;max-width:350px;align-self:center
+}
+#modal.task-card .p-word-cell{
+ display:flex;flex-direction:column;align-items:center;gap:4px
+}
+#modal.task-card .p-word .p-slot,#modal.task-card .p-word input{
+ width:100%;min-width:0
+}
+#modal.task-card .p-note{font-size:14px;margin:0}
+#modal.task-card .p-errors select{width:110px;font-size:15px}
+#modal.task-card .p-partitions .p-eq{
+ justify-content:center;gap:5px;font-size:17px
+}
+#modal.task-card .p-partitions input{width:41px;height:38px;font-size:17px}
+#modal.task-card .p-partitions select{width:115px;font-size:15px}
+@container(min-width:420px){
+ #modal.task-card .p-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@container(min-width:620px){
+ #modal.task-card .p-houses{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@container(min-width:740px){
+ #modal.task-card .p-three,
+ #modal.task-card .p-errors,
+ #modal.task-card .p-partitions{
+  grid-template-columns:repeat(3,minmax(0,1fr))
+ }
+}
+@media(max-width:700px){
+ #modal.task-card .p-eq{font-size:17px;gap:5px}
+ #modal.task-card .p-slot input{width:45px;font-size:18px}
+ #modal.task-card .p-slot select{width:55px}
+ #modal.task-card .p-errors select{width:100px}
+ #modal.task-card .p-partitions select{width:110px}
+ #modal.task-card .p-word input{width:100%}
+}
+`;
+
+page=page.replace("</style>",styles+"\n</style>");
+document.open();
+document.write(page);
+document.close();
+
+})().catch(error=>{
+ console.error(error);
+ document.body.textContent="Не удалось открыть игру. "+error.message;
+});
+</script>
+</body>
+</html>
